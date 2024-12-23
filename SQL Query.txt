@@ -1,0 +1,63 @@
+CREATE DATABASE calculator_db;
+
+USE calculator_db;
+
+CREATE TABLE calculation_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,  -- You could link to a user table if you have users
+    expression VARCHAR(255) NOT NULL,
+    result FLOAT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+INSERT INTO calculation_history (user_id, expression, result)
+VALUES (1, '5 + 3', 8);
+SELECT * FROM calculation_history
+WHERE user_id = 1
+ORDER BY timestamp DESC
+LIMIT 10;
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL
+);
+import sqlite3
+
+# Connect to the database
+conn = sqlite3.connect('calculator.db')
+cursor = conn.cursor()
+
+# Create the table if not already created
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS calculation_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    expression TEXT NOT NULL,
+    result REAL NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+)
+''')
+
+# Insert a calculation record
+cursor.execute('''
+INSERT INTO calculation_history (user_id, expression, result) 
+VALUES (?, ?, ?)
+''', (1, '5 + 3', 8))
+
+# Commit changes
+conn.commit()
+
+# Fetch the last 10 calculations
+cursor.execute('''
+SELECT * FROM calculation_history 
+WHERE user_id = ? 
+ORDER BY timestamp DESC 
+LIMIT 10
+''', (1,))
+
+# Display the results
+rows = cursor.fetchall()
+for row in rows:
+    print(row)
+
+# Close the connection
+conn.close()
